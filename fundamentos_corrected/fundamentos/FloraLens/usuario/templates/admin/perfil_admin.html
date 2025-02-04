@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Perfil de Administrador{% endblock %}
+{% block body_class %}admin-profile-page{% endblock %}
+
+{% block content %}
+<!-- Incluir Bootstrap y Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+<div class="main-container">
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+        <ul>
+            <li><a href="{% url 'admin_home' %}"><i class="fa-solid fa-users"></i> Gestión de Usuarios</a></li>
+            <li><a href="{% url 'gestion_plantas' %}"><i class="fa-solid fa-seedling"></i> Gestión de Plantas</a></li>
+            <li><a href="{% url 'perfil_admin' %}" class="active"><i class="fa-solid fa-user"></i> Perfil</a></li>
+        </ul>
+        <form method="post" action="{% url 'cerrar_sesion' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-button"><i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión</button>
+        </form>
+    </aside>
+
+
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 text-center">
+        <h3 class="text-success"><i class="fa-solid fa-user-gear"></i> Perfil del Usuario</h3>
+        <p class="text-muted">Consulta y actualiza tu información personal.</p>
+
+        <hr>
+
+        <h5 class="text-start"><i class="fa-solid fa-id-card"></i> Información Personal</h5>
+        <table class="table table-borderless text-start">
+            <tr><th><i class="fa-solid fa-user"></i> Nombre:</th><td>{{ admin.nombre }}</td></tr>
+            <tr><th><i class="fa-solid fa-user"></i> Apellido:</th><td>{{ admin.apellido }}</td></tr>
+            <tr><th><i class="fa-solid fa-envelope"></i> Correo Electrónico:</th><td>{{ admin.email }}</td></tr>
+            <tr><th><i class="fa-solid fa-phone"></i> Teléfono:</th><td>{{ admin.telefono }}</td></tr>
+            <tr><th><i class="fa-solid fa-calendar"></i> Fecha de Nacimiento:</th><td>{{ admin.fecha_nacimiento }}</td></tr>
+            <tr><th><i class="fa-solid fa-venus-mars"></i> Género:</th><td>{{ admin.genero }}</td></tr>
+        </table>
+
+        <button class="btn btn-success w-100 mt-3" onclick="toggleUpdatePopup()">
+            <i class="fa-solid fa-pen"></i> Actualizar Información
+        </button>
+    </div>
+</div>
+
+<!-- Pop-up para actualizar información -->
+<div id="update-popup" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content p-4">
+            <h4 class="text-center text-dark"><i class="fa-solid fa-user-edit"></i> Actualizar Información Personal</h4>
+            <form method="post" action="{% url 'actualizar_perfil' %}">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa-solid fa-user"></i> Nombre:</label>
+                        <input type="text" class="form-control" name="nombre" value="{{ admin.nombre }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa-solid fa-user"></i> Apellido:</label>
+                        <input type="text" class="form-control" name="apellido" value="{{ admin.apellido }}" required>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa-solid fa-user-tag"></i> Nombre de Usuario:</label>
+                        <input type="text" class="form-control" name="nombre_usuario" value="{{ admin.nombre_usuario }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa-solid fa-envelope"></i> Correo Electrónico:</label>
+                        <input type="email" class="form-control" name="email" value="{{ admin.email }}" required>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa-solid fa-lock"></i> Contraseña:</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa-solid fa-phone"></i> Teléfono:</label>
+                        <input type="text" class="form-control" name="telefono" value="{{ admin.telefono }}" required>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa-solid fa-calendar"></i> Fecha de Nacimiento:</label>
+                        <input type="date" class="form-control" name="fecha_nacimiento" value="{{ admin.fecha_nacimiento|date:'Y-m-d' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fa-solid fa-venus-mars"></i> Género:</label>
+                        <select class="form-select" name="genero">
+                            <option value="M" {% if admin.genero == 'M' %}selected{% endif %}>Masculino</option>
+                            <option value="F" {% if admin.genero == 'F' %}selected{% endif %}>Femenino</option>
+                            <option value="O" {% if admin.genero == 'O' %}selected{% endif %}>Otro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="fa-solid fa-times"></i> Cancelar</button>
+                    <button type="submit" class="btn btn-success"><i class="fa-solid fa-save"></i> Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleUpdatePopup() {
+        var myModal = new bootstrap.Modal(document.getElementById('update-popup'));
+        myModal.show();
+    }
+</script>
+
+{% endblock %}

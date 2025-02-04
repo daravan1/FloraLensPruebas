@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Panel de Administrador{% endblock %}
+{% block body_class %}admin-home-page{% endblock %}
+{% block content %}
+<div class="main-container">
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+        <ul>
+            <li><a href="{% url 'admin_home' %}" class="active"><i class="fas fa-users-cog"></i> Gestión de Usuarios</a></li>
+            <li><a href="{% url 'gestion_plantas' %}"><i class="fas fa-seedling"></i> Gestión de Plantas</a></li>
+            <li><a href="{% url 'perfil_admin' %}"><i class="fas fa-user"></i> Perfil</a></li>
+        </ul>
+        <form method="post" action="{% url 'cerrar_sesion' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-button"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+        </form>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main>
+        <section class="admin-container">
+            <div class="admin-box">
+                <div class="admin-header">
+                    <div class="admin-title-container">
+                        <h1>
+                            Gestión de <br>
+                            <span>Usuarios</span>
+                        </h1>
+                        <img src="{% static 'imagenes/Plantas02.png' %}" alt="Administración" class="admin-header-img">
+                    </div>
+                </div>                
+
+                <!-- Lista de Usuarios Registrados -->
+                <div class="admin-card">
+                    <h2><i class="fas fa-list"></i> Lista de Usuarios Registrados</h2>
+                    <table id="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Nombre de Usuario</th>
+                                <th>Correo Electrónico</th>
+                                <th>Teléfono</th>
+                                <th>Fecha de Nacimiento</th>
+                                <th>Género</th>
+                                <th>Rol</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.nombre }}</td>
+                                <td>{{ user.apellido }}</td>
+                                <td>{{ user.nombre_usuario }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.telefono }}</td>
+                                <td>{{ user.fecha_nacimiento }}</td>
+                                <td>{{ user.genero }}</td>
+                                <td>{{ user.rol }}</td>
+                                <td>
+                                    <button onclick="toggleUpdatePopup('{{ user.id }}', '{{ user.nombre }}', '{{ user.apellido }}', '{{ user.nombre_usuario }}', '{{ user.email }}', '{{ user.telefono }}', '{{ user.fecha_nacimiento }}', '{{ user.genero }}', '{{ user.rol }}')"><i class="fas fa-edit"></i> Actualizar</button>                                    
+                                    <form method="post" action="{% url 'eliminar_usuario' user.id %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit"><i class="fas fa-trash"></i> Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pop-up para actualizar usuario -->
+                <div id="update-popup" class="popup" style="display: none;">
+                    <div class="popup-content admin-card">
+                        <h3><i class="fas fa-user-edit"></i> Actualizar Usuario</h3>
+                        <form method="post" action="{% url 'actualizar_usuario' %}">
+                            {% csrf_token %}
+                            <input type="hidden" id="user-id" name="user_id">
+                            <div class="form-columns">
+                                <div class="input-group">
+                                    <label for="nombre"><i class="fas fa-user"></i> Nombre:</label>
+                                    <input type="text" id="nombre" name="nombre" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="apellido"><i class="fas fa-user"></i> Apellido:</label>
+                                    <input type="text" id="apellido" name="apellido" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="nombre_usuario"><i class="fas fa-user-tag"></i> Nombre de Usuario:</label>
+                                    <input type="text" id="nombre_usuario" name="nombre_usuario" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="email"><i class="fas fa-envelope"></i> Correo Electrónico:</label>
+                                    <input type="email" id="email" name="email" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="telefono"><i class="fas fa-phone"></i> Teléfono:</label>
+                                    <input type="text" id="telefono" name="telefono" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="fecha_nacimiento"><i class="fas fa-calendar-alt"></i> Fecha de Nacimiento:</label>
+                                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required>
+                                </div>
+                                <br>
+                                <div class="input-group">
+                                    <label for="genero"><i class="fas fa-venus-mars"></i> Género:</label>
+                                    <select id="genero" name="genero">
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Femenino</option>
+                                        <option value="O">Otro</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <label for="rol"><i class="fas fa-user-shield"></i> Rol:</label>
+                                    <select id="rol" name="rol">
+                                        <option value="usuario">Usuario</option>
+                                        <option value="administrador">Administrador</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <br>
+                            <div class="popup-actions">
+                                <button type="button" onclick="togglePopup()" class="cancel-btn"><i class="fas fa-times"></i> Cancelar</button>
+                                <button type="submit" class="save-btn"><i class="fas fa-save"></i> Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    function toggleUpdatePopup(id, nombre, apellido, nombre_usuario, email, telefono, fecha_nacimiento, genero, rol) {
+        document.getElementById('user-id').value = id;
+        document.getElementById('nombre').value = nombre;
+        document.getElementById('apellido').value = apellido;
+        document.getElementById('nombre_usuario').value = nombre_usuario;
+        document.getElementById('email').value = email;
+        document.getElementById('telefono').value = telefono;
+        document.getElementById('fecha_nacimiento').value = fecha_nacimiento;
+        document.getElementById('genero').value = genero;
+        document.getElementById('rol').value = rol;
+        document.getElementById('update-popup').style.display = 'block';
+    }
+
+
+    function togglePopup() {
+        document.getElementById('update-popup').style.display = 'none';
+    }
+</script>
+{% endblock %}

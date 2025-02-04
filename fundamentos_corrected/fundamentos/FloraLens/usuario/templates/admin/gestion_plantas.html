@@ -1,0 +1,251 @@
+{% extends "base.html" %} {% load static %} {% block title %}Gestión de
+Plantas{% endblock %} {% block body_class %}gestion-plantas-page{% endblock %}
+{% block content %}
+<div class="main-container">
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+        <ul>
+            <li><a href="{% url 'admin_home' %}"><i class="fa-solid fa-user-cog"></i> Gestión de Usuarios</a></li>
+            <li>
+                <a href="{% url 'gestion_plantas' %}" class="active"><i class="fa-solid fa-seedling"></i> Gestión de
+                    Plantas</a>
+            </li>
+            <li><a href="{% url 'perfil_admin' %}"><i class="fa-solid fa-user"></i> Perfil</a></li>
+        </ul>
+        <form method="post" action="{% url 'cerrar_sesion' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-button"><i class="fa-solid fa-sign-out-alt"></i> Cerrar sesión</button>
+        </form>
+    </aside>
+    <!-- Contenido principal -->
+    <main>
+        <section class="admin-container">
+            <div class="admin-box">
+                <div class="admin-header">
+                    <div class="titulo-container">
+                        <h1 class="titulo-gestion"><i class="fa-solid fa-leaf"></i> Gestión de <span>Plantas</span></h1>
+                    </div>
+                    <img src="{% static 'imagenes/vocal.jpg' %}" alt="Gestión de Plantas" class="gestion-plantas-img" />
+                </div>
+                <p class="welcome-text">
+                    Administra las plantas registradas en el sistema.
+                </p>
+
+                <!-- Botón para añadir nueva planta -->
+                <div class="actions">
+                    <button onclick="toggleAddPopup()"><i class="fa-solid fa-plus"></i> Añadir Nueva Planta</button>
+                </div>
+                <!-- Tabla de gestión de plantas -->
+                <div class="admin-table">
+                    <h2><i class="fa-solid fa-list"></i> Plantas Registradas</h2>
+                    <table id="plants-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Común</th>
+                                <th>Nombre Científico</th>
+                                <th>Especie</th>
+                                <th>Descripción</th>
+                                <th>Imagen</th>
+                                <th>Estado de Conservación</th>
+                                <th>Autor de registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for plant in plantas %}
+                            <tr>
+                                <td>{{ plant.id }}</td>
+                                <td>{{ plant.nombre_comun }}</td>
+                                <td>{{ plant.nombre_cientifico }}</td>
+                                <td>{{ plant.especie }}</td>
+                                <td>{{ plant.descripcion }}</td>
+                                <td>
+                                    <img src="{{ plant.imagen.url }}" alt="{{ plant.nombre_comun }}"
+                                        style="width: 120px; height: auto; border-radius: 8px" />
+                                </td>
+                                <td>{{ plant.estado_conservacion }}</td>
+                                <td>{{ plant.usuario_id }}</td>
+                                <td>
+                                    <button class="update-btn" onclick="llena_campos(
+                                        '{{ plant.id }}', 
+                                        '{{ plant.nombre_comun }}', 
+                                        '{{ plant.nombre_cientifico }}', 
+                                        '{{ plant.especie }}', 
+                                        '{{ plant.descripcion }}', 
+                                        '{{ plant.estado_conservacion }}')">
+                                        <i class="fa-solid fa-edit"></i> Actualizar
+                                    </button>
+                                    <form method="post" action="{% url 'eliminar_planta' plant.id %}"
+                                        style="display: inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete-btn"><i class="fa-solid fa-trash"></i>
+                                            Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pop-up para actualizar planta -->
+                <!-- Pop-up para actualizar planta -->
+                <div id="update-popup" class="popup">
+                    <div class="popup-content">
+                        <h3><i class="fas fa-seedling"></i> Actualizar Planta</h3>
+                        <form method="post" action="{% url 'actualizar_planta' 0 %}" enctype="multipart/form-data"
+                            id="update-form">
+                            {% csrf_token %}
+                            <input type="hidden" id="planta_id" name="planta_id" />
+
+                            <label for="nombre_comun"><i class="fas fa-leaf"></i> Nombre Común:</label>
+                            <input type="text" id="nombre_comun" name="nombre_comun" required />
+
+                            <label for="nombre_cientifico"><i class="fas fa-dna"></i> Nombre Científico:</label>
+                            <input type="text" id="nombre_cientifico" name="nombre_cientifico" required />
+
+                            <label for="especie"><i class="fas fa-paw"></i> Especie:</label>
+                            <input type="text" id="especie" name="especie" required />
+
+                            <label for="descripcion"><i class="fas fa-align-left"></i> Descripción:</label>
+                            <textarea id="descripcion" name="descripcion" required></textarea>
+
+                            <label for="imagen"><i class="fas fa-image"></i> Imagen:</label>
+                            <input type="file" id="imagen" name="imagen" accept="image/*" />
+
+                            <label for="estado_conservacion"><i class="fas fa-globe"></i> Estado de
+                                Conservación:</label>
+                            <input type="text" id="estado_conservacion" name="estado_conservacion" required />
+
+                            <div class="popup-actions">
+                                <button type="button" onclick="togglePopup()"><i class="fas fa-times"></i>
+                                    Cancelar</button>
+                                <button type="submit"><i class="fas fa-save"></i> Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Pop-up para añadir nueva planta -->
+                <div id="add-popup" class="popup">
+                    <div class="popup-content">
+                        <h3><i class="fas fa-leaf"></i> Añadir Nueva Planta</h3>
+                        <form method="post" action="{% url 'crear_planta' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <label for="nombre_comun_new"><i class="fas fa-leaf"></i> Nombre Común:</label>
+                            <input type="text" id="nombre_comun_new" name="nombre_comun" required />
+
+                            <label for="nombre_cientifico_new"><i class="fas fa-dna"></i> Nombre Científico:</label>
+                            <input type="text" id="nombre_cientifico_new" name="nombre_cientifico" required />
+
+                            <label for="especie_new"><i class="fas fa-paw"></i> Especie:</label>
+                            <input type="text" id="especie_new" name="especie" required />
+
+                            <label for="descripcion_new"><i class="fas fa-align-left"></i> Descripción:</label>
+                            <textarea id="descripcion_new" name="descripcion" required></textarea>
+
+                            <label for="estado_conservacion_new"><i class="fas fa-globe"></i> Estado de
+                                Conservación:</label>
+                            <input type="text" id="estado_conservacion_new" name="estado_conservacion" required />
+
+                            <label for="imagen_new"><i class="fas fa-image"></i> Imagen:</label>
+                            <input type="file" id="imagen_new" name="imagen" accept="image/*" required />
+
+                            <div class="popup-actions">
+                                <button type="button" onclick="toggleAddPopup()"><i class="fas fa-times"></i>
+                                    Cancelar</button>
+                                <button type="submit"><i class="fas fa-save"></i> Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    function llena_campos(id, nombreComun, nombreCientifico, especie, descripcion, estadoConservacion) {
+        const popup = document.getElementById('update-popup');
+        const form = document.getElementById('update-form');
+
+        if (popup.style.display === 'none' || popup.style.display === '') {
+            popup.style.display = 'block';
+
+            // Llenar los campos del formulario con los datos de la planta
+            document.getElementById('planta_id').value = id;
+            document.getElementById('nombre_comun').value = nombreComun;
+            document.getElementById('nombre_cientifico').value = nombreCientifico;
+            document.getElementById('especie').value = especie;
+            document.getElementById('descripcion').value = descripcion;
+            document.getElementById('estado_conservacion').value = estadoConservacion;
+
+            // Modificar la acción del formulario para enviar los datos al backend
+            form.action = `/usuario/actualizar_planta/${id}/`;
+        }
+    }
+
+
+    function togglePopup() {
+        document.getElementById('update-popup').style.display = 'none';
+    }
+
+    function toggleAddPopup() {
+        const popup = document.getElementById("add-popup");
+        popup.style.display = popup.style.display === "block" ? "none" : "block";
+    }
+</script>
+<!-- Estilos mejorados -->
+<style>
+    .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        width: 400px;
+        max-width: 90%;
+        display: none;
+        z-index: 1000;
+    }
+    .popup-content h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .popup-content h3 i {
+        color: #2c3e50;
+    }
+    .popup input, .popup textarea {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    .popup-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+    }
+    .popup-actions button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+    .popup-actions button:first-child {
+        background: #e74c3c;
+        color: white;
+    }
+    .popup-actions button:last-child {
+        background: #2ecc71;
+        color: white;
+    }
+</style>
+{% endblock %}

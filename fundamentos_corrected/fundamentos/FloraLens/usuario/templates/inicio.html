@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Inicio - FloraLens{% endblock %}
+
+{% block body_class %}inicio-page{% endblock %}
+{% block content %}
+<div class="hero-section" >
+    <img src="{% static 'imagenes/foto.png' %}" alt="Imagen de fondo"  class="hero-background"  />
+    <div class="overlay"></div>
+    <div class="hero-content">
+        <h1>Descubre, identifica y aprende sobre plantas</h1>
+        <form class="search-bar">
+            <input type="text" placeholder="Coloca las características de tu planta aquí">
+            <button type="submit">
+                <i class="fas fa-search"></i> <!-- Puedes usar FontAwesome para el ícono -->
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

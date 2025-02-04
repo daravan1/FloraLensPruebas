@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Inicio del Usuario{% endblock %}
+{% block body_class %}usuario-home-page{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+        <ul>
+            <li><a href="{% url 'usuario_home' %}" class="active"><i class="fas fa-seedling"></i> Herbario</a></li>
+            <li><a href="{% url 'perfil_usuario' %}"><i class="fas fa-user"></i> Perfil</a></li>
+        </ul>
+        <form method="post" action="{% url 'cerrar_sesion' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-button"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+        </form>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main>
+        <section class="usuario-container">
+            <div class="usuario-box">
+                <div class="gestion-usuarios-header">
+                    <h1>Gestión de <br> <span>Herbario</span></h1>
+                    <img src="{% static 'imagenes/Plantas.png' %}" alt="Decoración de usuarios"
+                        class="gestion-usuarios-img">
+                </div>
+                <p class="welcome-text">Explora las plantas disponibles en<br> tu herbario personalizado.</p>
+                <!-- Botón para añadir nueva planta personalizada -->
+                <div class="actions">
+                    <button onclick="toggleAddPopup()">Añadir Planta Personalizada</button>
+                </div>
+
+                <!-- Tabla de plantas personalizadas -->
+                <div class="usuario-table">
+                    <h2>Plantas Personalizadas</h2>
+                    {% if plantas_personalizadas %}
+                    <table id="plants-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Común</th>
+                                <th>Especie</th>
+                                <th>Categorías</th>
+                                <th>Lugar</th>
+                                <th>Descripción Personalizada</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for planta_usuario in plantas_personalizadas %}
+                            <tr>
+                                <td>{{ planta_usuario.planta.id }}</td>
+                                <td>{{ planta_usuario.planta.nombre_comun }}</td>
+                                <td>{{ planta_usuario.planta.especie }}</td>
+                                <td>
+                                    {% for relacion in planta_usuario.planta.planta_categorias.all %}
+                                    {{ relacion.categoria.nombre_categoria }}{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+                                </td>
+                                <td>{{ planta_usuario.lugar }}</td>
+                                <td>{{ planta_usuario.descripcion_personalizada }}</td>
+                                <td>
+                                    <button
+                                        onclick="toggleUpdatePopup('{{ planta_usuario.id }}', '{{ planta_usuario.planta.nombre_comun }}', '{{ planta_usuario.lugar }}', '{{ planta_usuario.descripcion_personalizada }}')">
+                                        Actualizar
+                                    </button>
+                                    <form method="post"
+                                        action="{% url 'eliminar_planta_personalizada' planta_usuario.id %}"
+                                        style="display: inline">
+                                        {% csrf_token %}
+                                        <button type="submit">Eliminar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p>No tienes plantas personalizadas registradas. ¡Añade una para comenzar!</p>
+                    {% endif %}
+                </div>
+
+                <!-- Pop-up para actualizar planta personalizada -->
+                <div id="update-popup" class="popup" style="display: none">
+                    <div class="popup-content">
+                        <h3>Actualizar Planta Personalizada</h3>
+                        <form method="post" action="{% url 'actualizar_planta_personalizada' %}">
+                            {% csrf_token %}
+                            <input type="hidden" id="personalized-plant-id" name="personalized_plant_id" />
+
+                            <div class="input-group">
+                                <label for="nombre_comun">Nombre Común:</label><br>
+                                <input type="text" id="nombre_comun" name="nombre_comun" readonly /><br><br>
+                            </div>
+
+                            <div class="input-group"> 
+                                <label for="lugar"><i class="fas fa-map-marker-alt"></i> Lugar:</label><br>
+                                <input type="text" id="lugar" name="lugar" required /><br><br>
+
+                            </div>
+
+                            <div class="input-group">
+                                <label for="descripcion_personalizada"><i class="fas fa-pencil-alt"></i> Descripción Personalizada:</label><br>
+                            <textarea id="descripcion_personalizada" name="descripcion_personalizada"
+                                required></textarea>
+                            </div>
+                            <br>
+
+                            <div class="popup-actions">
+                                <button type="button" class="cancel-btn" onclick="togglePopup()">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
+                                <button type="submit"class="save-btn">
+                                    <i class="fas fa-save"></i> Guardar
+                                </button> 
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Pop-up para añadir nueva planta personalizada -->
+                <div id="add-popup" class="popup" style="display: none">
+                    <div class="popup-content">
+                        <h3><i class="fas fa-seedling"></i>Añadir Planta Personalizada</h3>
+                        <form method="post" action="{% url 'añadir_planta_personalizada' %}">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <label for="planta_id">Seleccionar Planta:</label><br>
+                                <select id="planta_id" name="planta_id" required>
+                                    {% for planta in plantas_disponibles %}
+                                    <option value="{{ planta.id }}">{{ planta.nombre_comun }}</option>
+                                    {% empty %}
+                                    <option value="">No hay plantas disponibles</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <br>
+                            <br>
+                            <div class="input-group">
+                                <label for="lugar"><i class="fas fa-map-marker-alt"></i> Lugar:</label><br>
+                                <input type="text" id="lugar" name="lugar" required />
+                            </div>
+                            <br>
+                            <br>
+                            <di class="input-group">
+                                <label for="descripcion_personalizada"><i class="fas fa-pencil-alt"></i> Descripción Personalizada:</label><br>
+                                <textarea id="descripcion_personalizada" name="descripcion_personalizada"
+                                    required></textarea>
+                            </div>
+                            <br>
+                            <br>
+                            <div class="popup-actions">
+                                <button type="button" onclick="toggleAddPopup()"><i class="fas fa-times"></i> Cancelar</button>
+                                <button type="submit"><i class="fas fa-save"></i> Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    function toggleUpdatePopup(id, nombreComun, lugar, descripcionPersonalizada) { // Mostrar pop-up de actualización
+        const popup = document.getElementById("update-popup");
+        popup.style.display = "block";
+
+        document.getElementById("personalized-plant-id").value = id;
+        document.getElementById("nombre_comun").value = nombreComun;
+        document.getElementById("lugar").value = lugar;
+        document.getElementById("descripcion_personalizada").value = descripcionPersonalizada;
+    }
+
+    function togglePopup() { // Cerrar pop-up de actualización
+        document.getElementById("update-popup").style.display = "none";
+    }
+
+    function toggleAddPopup() { // Mostrar/ocultar pop-up de añadir planta personalizada
+        const popup = document.getElementById("add-popup");
+        popup.style.display = popup.style.display === "block" ? "none" : "block";
+    }
+
+    window.onclick = function (event) { // Cerrar pop-up al hacer clic fuera del 
+        const updatePopup = document.getElementById("update-popup");
+        const addPopup = document.getElementById("add-popup");
+
+        if (event.target == updatePopup) {
+            updatePopup.style.display = "none";
+        }
+
+        if (event.target == addPopup) {
+            addPopup.style.display = "none";
+        }
+    }
+
+    // Obtener plantas disponibles para añadir
+    console.log("Plantas disponibles en JavaScript:", '{{ plantas_disponibles_json|escapejs }}');
+
+    const plantasDisponibles = JSON.parse('{{ plantas_disponibles_json|escapejs }}');
+    const select = document.getElementById("planta_id");
+
+    if (plantasDisponibles.length === 0) {
+        console.error("🚨 No hay plantas en el JSON.");
+    } else {
+        console.log("✅ Plantas cargadas:", plantasDisponibles);
+    }
+
+    plantasDisponibles.forEach(planta => {
+        const option = document.createElement("option");
+        option.value = planta.id;
+        option.text = planta.nombre_comun;
+        select.appendChild(option);
+    });
+
+    // Inicializar tabla de plantas personalizadas
+    const table = document.getElementById("plants-table");
+    if (table) {
+        table.style.display = "table";
+    }
+
+    // Mostrar mensaje de éxito al añadir planta personalizada
+    const successMessage = '{{ success_message }}';
+    if (successMessage) {
+        alert(successMessage);
+    }
+
+    // Mostrar mensaje de error al añadir planta personalizada
+    const errorMessage = '{{ error_message }}';
+    if (errorMessage) {
+        alert(errorMessage);
+    }
+
+</script>
+{% endblock %}

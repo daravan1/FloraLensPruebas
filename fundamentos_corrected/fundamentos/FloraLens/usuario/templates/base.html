@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MyProject{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <header>
+        <div class="logo" >
+            <img src="{% static 'imagenes/logo.png' %}" alt="Logo de FloraLens" />
+            <a href="{% url 'inicio' %}">FloraLens</a>
+        </div>
+        <nav>
+            <a href="#">Categorías</a>
+            <a href="{% url 'login' %}">Herbario</a>
+            <a href="#">Modelos 3D</a>
+            <a href="#">Blog</a>
+            <a href="{% url 'login' %}">Iniciar sesión</a>
+            <a href="{% url 'signup' %}">Registrarse</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <section class="menuAbajo">
+            <div>
+                <h4>Muchas gracias</h4>
+                <p>
+                    FloraLens - Las plantas han sido una parte esencial de nuestro
+                    entorno y hogar,<br />
+                    especialmente ahora que buscamos reconectar con la naturaleza.
+                    <br />Explora y aprende sobre la flora que te rodea, todo desde
+                    nuestra plataforma <br />diseñada para amantes de las plantas y la
+                    botánica.
+                </p>
+            </div>
+            <div>
+                <h4>Información</h4>
+                <a href="#">Acerca de nosotros</a><br />
+                <a href="#">Guía de uso</a><br />
+                <a href="#">Preguntas frecuentes</a>
+            </div>
+            <div>
+                <h4>Contactos</h4>
+                <p>Correo: contacto@floralens.com</p>
+                <div class="social-icons">
+                    <img src="{% static 'imagenes/Facebook.png' %}" alt="Facebook" />
+                    <img src="{% static 'imagenes/Twitter.png' %}" alt="Twitter" />
+                    <img src="{% static 'imagenes/Instagram.png' %}" alt="Instagram" />
+                </div>
+            </div>
+        </section>
+    </footer>
+</body>
+</html>

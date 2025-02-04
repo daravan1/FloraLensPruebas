@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Perfil de Usuario{% endblock %}
+{% block body_class %}usuario-perfil-page{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+        <ul>
+            <li><a href="{% url 'usuario_home' %}"><i class="fas fa-seedling"></i> Herbario</a></li>
+            <li><a href="{% url 'perfil_usuario' %}" class="active"><i class="fas fa-user"></i> Perfil</a></li>
+        </ul>
+        <form method="post" action="{% url 'cerrar_sesion' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-button"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</button>
+        </form>
+    </aside>
+
+    <!-- Contenido principal -->
+    <main> <!-- si valeeee -->
+        <section class="usuario-container">
+            <div class="usuario-box">
+                <div class="usuario-header">
+                    <h2><i class="fas fa-user-edit"></i> Perfil del Usuario</h2>
+                    <p class="welcome-text">Consulta y actualiza tu información personal.</p>
+                </div>
+
+                <!-- Información del Usuario -->
+                <div class="usuario-profile card">
+                    <h3><i class="fas fa-address-card"></i> Información Personal</h3>
+                    <table class="profile-table">
+                        <tr>
+                            <th><i class="fas fa-user"></i> Nombre:</th>
+                            <td>{{ usuario.nombre }}</td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-user"></i> Apellido:</th>
+                            <td>{{ usuario.apellido }}</td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-envelope"></i> Correo Electrónico:</th>
+                            <td>{{ usuario.email }}</td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-phone"></i> Teléfono:</th>
+                            <td>{{ usuario.telefono }}</td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-calendar-alt"></i> Fecha de Nacimiento:</th>
+                            <td>{{ usuario.fecha_nacimiento }}</td>
+                        </tr>
+                        <tr>
+                            <th><i class="fas fa-venus-mars"></i> Género:</th>
+                            <td>{{ usuario.genero }}</td>
+                        </tr>
+                    </table>
+                    <button class="actions-button" onclick="toggleUpdatePopup()"><i class="fas fa-edit"></i> Actualizar Información</button>
+                </div>
+
+                <!-- Pop-up para actualizar información personal -->
+                <div id="update-popup" class="popup" style="display: none;">
+                    <div class="popup-content card">
+                        <h3><i class="fas fa-user-edit"></i> Actualizar Información Personal</h3>
+                        <form method="post" action="{% url 'actualizar_usuario' %}">
+                            <input type="hidden" name="user_id" value="{{ usuario.id }}">
+                            {% csrf_token %}
+
+                            <div class="form-columns">
+                                <div class="input-group">
+                                    <label for="nombre"><i class="fas fa-user"></i> Nombre:</label>
+                                    <input type="text" id="nombre" name="nombre" value="{{ usuario.nombre }}" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="apellido"><i class="fas fa-user"></i> Apellido:</label>
+                                    <input type="text" id="apellido" name="apellido" value="{{ usuario.apellido }}" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="username"><i class="fas fa-user-tag"></i> Nombre de Usuario:</label>
+                                    <input type="text" id="username" name="username" value="{{ usuario.nombre_usuario }}" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="email"><i class="fas fa-envelope"></i> Correo Electrónico:</label>
+                                    <input type="email" id="email" name="email" value="{{ usuario.email }}" required>
+                                </div>
+
+                                <div class="input-group">
+                                    <label for="password"><i class="fas fa-lock"></i> Contraseña:</label>
+                                    <input type="password" id="password" name="password" required>
+                                </div>
+
+
+                                <div class="input-group">
+                                    <label for="telefono"><i class="fas fa-phone"></i> Teléfono:</label>
+                                    <input type="text" id="telefono" name="telefono" value="{{ usuario.telefono }}" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="fecha_nacimiento"><i class="fas fa-calendar-alt"></i> Fecha de Nacimiento:</label>
+                                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ usuario.fecha_nacimiento|date:'Y-m-d' }}" required>
+                                </div>
+                                <div class="input-group">
+                                    <label for="genero"><i class="fas fa-venus-mars"></i> Género:</label>
+                                    <select id="genero" name="genero">
+                                        <option value="M" {% if usuario.genero == 'M' %}selected{% endif %}>Masculino</option>
+                                        <option value="F" {% if usuario.genero == 'F' %}selected{% endif %}>Femenino</option>
+                                        <option value="O" {% if usuario.genero == 'O' %}selected{% endif %}>Otro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="popup-actions">
+                                <button type="button" onclick="toggleUpdatePopup()" class="cancel-btn"><i class="fas fa-times"></i> Cancelar</button>
+                                <button type="submit" class="save-btn"><i class="fas fa-save"></i> Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    function toggleUpdatePopup() {
+        const popup = document.getElementById('update-popup');
+        popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
+    }
+</script>
+{% endblock %}
